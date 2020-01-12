@@ -9,11 +9,10 @@ import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import NotFound from './pages/404';
 
-import rootReducer from './reducers';
-import AppState from './types/appState';
+import { rootReducer, RootState } from './reducers';
 
 declare global {
-    interface Window { __PRELOADED_STATE__: AppState; }
+    interface Window { __PRELOADED_STATE__: RootState; }
 }
 
 let preloadedState;

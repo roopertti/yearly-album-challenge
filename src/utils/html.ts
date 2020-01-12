@@ -1,7 +1,7 @@
 import serialize from 'serialize-javascript';
-import AppState from '../client/types/appState';
+import { RootState } from '../client/reducers';
 
-export const html = (body: string, preloadedState: AppState) => `
+export const html = (body: string, preloadedState: RootState) => `
     <!DOCTYPE html>
     <html>
     <head>

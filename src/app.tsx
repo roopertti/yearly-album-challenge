@@ -9,15 +9,17 @@ import mongoose from 'mongoose';
 import React from 'react';
 import { renderToString } from 'react-dom/server';
 import { createStore } from 'redux';
-import rootReducers from './client/reducers';
-import AppState from './client/types/appState';
+import { rootReducer, RootState} from './client/reducers';
 import { StaticRouter } from 'react-router-dom';
 import { StaticContext } from 'react-router';
 import App from './client/App';
-import { html } from './config/html';
+import { html } from './utils/html';
+import { IUser } from './models/User';
+import { User as UserReduxType } from './client/types/userTypes';
+import { setUser } from './client/actions/userActions';
 
 /* Import config */
-import { setupPassport } from './config/passport';
+import { setupPassport } from './utils/passport';
 
 /* Routes */
 import AuthRoutes from './routes/AuthRoutes';
@@ -57,11 +59,22 @@ app.use(passport.initialize());
 app.use(passport.session());
 setupPassport();
 
+/* Routes */
+app.use('/auth', AuthRoutes);
+
 app.get('/*', (req, res) => {
     const context: StaticContext = {};
 
-    const store = createStore(rootReducers);
-    const preloadedState: AppState = store.getState();
+    const store = createStore(rootReducer);
+
+    /* If user session is found, update user data to Redux store */
+    if(req.user) {
+        const { id, spotifyId, username, displayName } = req.user as IUser;
+        const userState: UserReduxType = { id, spotifyId, username, displayName };
+        store.dispatch(setUser(userState));
+    }
+
+    const preloadedState: RootState = store.getState();
 
     const body = renderToString(
         <StaticRouter location={req.url} context={context}>
@@ -75,18 +88,5 @@ app.get('/*', (req, res) => {
 
     res.send(html(body, preloadedState));
 });
-
-app.get('/404', (req, res) => {
-    res.send('404');
-});
-
-app.get('/app', (req, res) => {
-    console.log('Logged in successfully');
-    console.log(req.user);
-    res.send('login success');
-});
-
-/* Routes */
-app.use('/auth', AuthRoutes);
 
 export default app;

@@ -1,7 +1,8 @@
 export interface User {
+    id: string;
     spotifyId: string;
     username: string;
-    displayName: string;
+    displayName?: string;
 }
 
 export type UserState = User | null;
